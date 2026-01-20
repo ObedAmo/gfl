@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+title: "gfl: Generalized Fused Lasso Solvers"
+authors:
+  - family-names: "Amo"
+    given-names: "Obed"
+message: >
+  If you use this software in your research, please cite the software
+  and the original methodological reference listed below.
+type: software
+preferred-citation:
+  type: software
+  title: "gfl: Generalized Fused Lasso Solvers"
+  authors:
+    - family-names: "Amo"
+      given-names: "Obed"
+  year: 2026
+  url: "https://github.com/ObedAmo/gfl"
+references:
+  - type: article
+    title: "Coordinate optimization for generalized fused Lasso"
+    authors:
+      - family-names: "Ohishi"
+    year: 2021
+    doi: "10.1080/03610926.2021.1931888"

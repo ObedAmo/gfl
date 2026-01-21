@@ -37,3 +37,6 @@ cmake-build*/
 # IPython
 profile_default/
 ipython_config.py
+
+# Results
+benchmarks/results/

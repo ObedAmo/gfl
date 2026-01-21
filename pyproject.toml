@@ -29,6 +29,16 @@ dependencies = [
     "scipy>=1.9",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov>=4.0",
+]
+
+benchmark = [
+    "cvxpy>=1.4",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

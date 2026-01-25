@@ -14,7 +14,7 @@ We consider the optimization problem of the form
 \min_{\theta \in \mathbb{R}^m}
 \;\frac{1}{2}\sum_{i=1}^n (y_i - \theta_{g_i})^2
 \;+\;
-\lambda \sum_{(u,v)\in \mathcal{E}} w_{uv}\,|\theta_u - \theta_v|,
+\lambda \sum_{(u,v)\in \mathcal{F}} w_{uv}\,|\theta_u - \theta_v|,
 \]
 
 where:
@@ -22,7 +22,7 @@ where:
 - \(y_i\) are observed responses,
 - \(g_i \in \{1,\dots,m\}\) assigns observation \(i\) to a group,
 - \(\theta_j\) is a scalar parameter associated with group \(j\),
-- \(\mathcal{E}\) is a set of index pairs defining fusion constraints,
+- \(\mathcal{F}\) is a set of index pairs defining fusion constraints,
 - \(w_{uv} > 0\) are fusion weights,
 - \(\lambda \ge 0\) controls the strength of fusion.
 

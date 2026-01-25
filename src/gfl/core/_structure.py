@@ -129,12 +129,6 @@ class GFLStructure:
 
         arr = coo_array((data, (rows, cols)), shape=(n, n), dtype=np.float64).tocsr()
 
-        # NOTE: Because we deduplicated fusion_pairs already, (u,v) should be unique.
-        # The symmetric expansion will also be unique unless u==v (already removed).
-        # Still, COO->CSR can sum duplicates; that would only happen if caller bypasses
-        # checking and provides duplicates. If you want to prevent summation, keep
-        # check_input=True.
-
         self._csr_arr = arr
     
     def get_neighbors(self, i: int) -> npt.NDArray[np.int64]:

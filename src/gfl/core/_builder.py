@@ -18,6 +18,7 @@ def build_gfl_structure(
     fusion_pairs: npt.ArrayLike,
     *,
     n_groups: Optional[int] = None,
+    weights: Optional[npt.NDArray] = None,
     adaptive: bool = True,
     ols_method: Literal["mean", "median", "trimmed_mean", "huber", "lts"] = "mean",
     gamma: float = 1.0,
@@ -50,9 +51,13 @@ def build_gfl_structure(
         fusion between groups i and j. Must use same encoding as `groups`.
     n_groups : int, optional
         Total number of groups. If None, inferred as max(groups) + 1.
+    weights: array-like of shape (n_pairs,), optional
+        Pre-computed fusion weights. If provided, both `adaptive` and 
+        `ols_method` parameters are ignored. If None, weights are computed
+        based on the `adaptive` flag.
     adaptive : bool, default=True
         If True, compute adaptive weights based on initial OLS estimates.
-        If False, use uniform weights (standard fused lasso).
+        If False, use uniform weights. Ignored if `weights` is provided.
     ols_method : {"mean", "median", "trimmed_mean", "huber", "lts"}, default="mean"
         Method for computing initial group estimates. Only used if adaptive=True.
         - "mean": Group-wise mean (standard OLS)
@@ -137,31 +142,33 @@ def build_gfl_structure(
     allowing for a fast path when building structures repeatedly (e.g., in
     cross-validation or bootstrap).
     """
-    # Compute weights based on strategy
-    if adaptive:
-        # Step 1: Compute initial group estimates
-        theta_init = compute_groupwise_ols(
-            y, 
-            groups,
-            n_groups=n_groups,
-            method=ols_method,
-            check_input=check_input
-        )
-        
-        # Step 2: Compute adaptive weights
-        weights = compute_adaptive_weights(
-            fusion_pairs,
-            theta_init,
-            gamma=gamma,
-            w_max=w_max,
-            check_inputs=check_input
-        )
-    else:
-        # Uniform weights (standard fused lasso)
-        weights = compute_uniform_weights(
-            fusion_pairs,
-            check_inputs=check_input
-        )
+    # Compute or use provided weights
+    if weights is None:
+        # Compute weights based on strategy
+        if adaptive:
+            # Step 1: Compute initial group estimates
+            theta_init = compute_groupwise_ols(
+                y, 
+                groups,
+                n_groups=n_groups,
+                method=ols_method,
+                check_input=check_input
+            )
+            
+            # Step 2: Compute adaptive weights
+            weights = compute_adaptive_weights(
+                fusion_pairs,
+                theta_init,
+                gamma=gamma,
+                w_max=w_max,
+                check_inputs=check_input
+            )
+        else:
+            # Uniform weights (standard fused lasso)
+            weights = compute_uniform_weights(
+                fusion_pairs,
+                check_inputs=check_input
+            )
     
     # Step 3: Infer n_groups if not provided
     if n_groups is None:

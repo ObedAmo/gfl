@@ -2,6 +2,8 @@ import numpy as np
 import numpy.typing as npt
 from typing import Tuple, Optional, Literal, Any
 
+from gfl._types import DuplicateStrategy
+
 
 def _ensure_array(
     arr: Any, 
@@ -413,7 +415,7 @@ def check_fusion_pairs(
         weights: npt.ArrayLike,
         *,
         n_params: Optional[int] = None,
-        duplicate_strategy: Literal['first', 'sum', 'mean', 'max', 'min'] = 'first'
+        duplicate_strategy: DuplicateStrategy= 'first'
 ) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64], int]:
     """
     Validate and canonicalize fusion pairs and weights.
@@ -524,7 +526,7 @@ def check_groups_and_pairs(
     fusion_pairs: npt.ArrayLike,
     weights: npt.ArrayLike,
     n_groups: Optional[int] = None,
-    duplicate_strategy: Literal['first', 'sum', 'mean', 'max', 'min'] = 'first'
+    duplicate_strategy: DuplicateStrategy = 'first'
 ) -> Tuple[npt.NDArray[np.int64], int, npt.NDArray[np.int64], npt.NDArray[np.float64]]:
     """
     Validate groups and fusion pairs together, ensuring consistency.

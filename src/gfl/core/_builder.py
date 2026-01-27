@@ -10,6 +10,7 @@ from gfl.core._weights import (
     compute_adaptive_weights,
     compute_uniform_weights
 )
+from gfl._types import OLSMethod
 
 
 def build_gfl_structure(
@@ -20,7 +21,7 @@ def build_gfl_structure(
     n_groups: Optional[int] = None,
     weights: Optional[npt.NDArray] = None,
     adaptive: bool = True,
-    ols_method: Literal["mean", "median", "trimmed_mean", "huber", "lts"] = "mean",
+    ols_method: OLSMethod = "mean",
     gamma: float = 1.0,
     w_max: Optional[float] = None,
     check_input: bool = True,

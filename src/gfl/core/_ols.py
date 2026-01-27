@@ -5,6 +5,7 @@ import numpy.typing as npt
 from typing import Literal, Optional
 
 from gfl.utils import check_1d_array, check_groups
+from gfl._types import OLSMethod
 
 
 def _trimmed_mean_sorted(
@@ -124,9 +125,7 @@ def compute_groupwise_ols(
         groups: npt.ArrayLike,
         *,
         n_groups: Optional[int] = None,
-        method: Literal[
-            "mean", "median", "trimmed_mean", "huber", "lts"
-        ] = "mean",
+        method: OLSMethod = "mean",
         trim: float = 0.1,
         huber_delta: float = 1.345,
         max_iter: int = 100,

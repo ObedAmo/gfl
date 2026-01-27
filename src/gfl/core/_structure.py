@@ -16,9 +16,7 @@ from typing import Tuple, Optional, Literal, List, Dict
 from scipy.sparse import csr_array, coo_array
 
 from gfl.utils import check_fusion_pairs
-
-
-DuplicateStrategy = Literal["first", "sum", "mean", "max", "min"]
+from gfl._types import DuplicateStrategy
 
 
 class GFLStructure:

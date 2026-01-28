@@ -2,6 +2,7 @@
 import pytest
 from gfl.utils import UnionFind
 
+
 # =============================================================================
 # Basic Initialization Tests
 # =============================================================================
@@ -154,7 +155,7 @@ def test_get_multi_element_components():
     uf.union(0, 1)
     uf.union(1, 2)
     uf.union(5, 6)
-    
+
     multi = uf.get_multi_element_components()
     sizes = sorted(len(v) for v in multi.values())
     assert sizes == [2, 3]
@@ -165,11 +166,11 @@ def test_get_multi_element_components():
 # =============================================================================
 
 def test_all_elements_in_one_component():
-    """Test when all elements are unioned into one component."""
+    """Test when all elements are union into one component."""
     uf = UnionFind(5)
     for i in range(4):
         uf.union(i, i + 1)
-    
+
     assert uf.n_components == 1
     comps = uf.get_components()
     root = uf.find(0)
@@ -195,7 +196,7 @@ def test_graph_connected_components():
     uf = UnionFind(6)
     for u, v in [(0, 1), (1, 2), (3, 4)]:
         uf.union(u, v)
-    
+
     comps = [set(v) for v in uf.get_components().values()]
     assert {0, 1, 2} in comps
     assert {3, 4} in comps
@@ -208,7 +209,7 @@ def test_large_union_find():
     uf = UnionFind(n)
     for i in range(0, n - 1, 2):
         uf.union(i, i + 1)
-    
+
     assert uf.n_components == n // 2
     assert uf.connected(0, 1)
     assert not uf.connected(0, 2)

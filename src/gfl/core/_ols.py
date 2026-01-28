@@ -1,15 +1,18 @@
 """Group-wise location estimators (1D)"""
 import warnings
 import numpy as np
-import numpy.typing as npt
-from typing import Literal, Optional
-
+from typing import Optional
 from gfl.utils import check_1d_array, check_groups
-from gfl._types import OLSMethod
+from gfl.typing import (
+    OLSMethod,
+    FloatArray,
+    FloatArrayLike,
+    IntArrayLike
+)
 
 
 def _trimmed_mean_sorted(
-    vals: npt.NDArray[np.float64], 
+    vals: FloatArray,
     trim: float
 ) -> float:
     """
@@ -35,7 +38,7 @@ def _trimmed_mean_sorted(
 
 
 def _huber_irls(
-    vals: npt.NDArray[np.float64],
+    vals: FloatArray,
     delta: float,
     max_iter: int,
     tol: float
@@ -66,7 +69,7 @@ def _huber_irls(
 
 
 def _lts(
-    vals: npt.NDArray[np.float64], 
+    vals: FloatArray,
     trim: float,
     patience: int,
     tol: float
@@ -121,8 +124,8 @@ def _lts(
 
 
 def compute_groupwise_ols(
-        y: npt.ArrayLike,
-        groups: npt.ArrayLike,
+        y: FloatArrayLike,
+        groups: IntArrayLike,
         *,
         n_groups: Optional[int] = None,
         method: OLSMethod = "mean",
@@ -133,7 +136,7 @@ def compute_groupwise_ols(
         lts_patience: int = 5,
         lts_tol: float = 1e-12,
         check_input: bool = True
-) -> npt.NDArray[np.float64]: 
+) -> FloatArray:
     """
     Compute group-wise unpenalized estimates (group-wise OLS and robust variants).
 

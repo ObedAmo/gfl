@@ -3,7 +3,7 @@ import numpy as np
 import pytest
 from numpy.testing import assert_array_equal, assert_array_almost_equal
 
-from gfl.core._group_stats import compute_group_data
+from gfl import compute_group_data
 
 
 # =============================================================================

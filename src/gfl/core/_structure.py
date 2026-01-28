@@ -11,12 +11,14 @@ solver implementations.
 """
 
 import numpy as np
-import numpy.typing as npt
-from typing import Tuple, Optional, Literal, List, Dict
+from typing import Tuple, Optional, List, Dict
 from scipy.sparse import csr_array, coo_array
-
 from gfl.utils import check_fusion_pairs
-from gfl._types import DuplicateStrategy
+from gfl.typing import (
+    DuplicateStrategy,
+    EdgeArrayLike, FloatArray,
+    FloatArrayLike, IntArray
+)
 
 
 class GFLStructure:
@@ -63,10 +65,11 @@ class GFLStructure:
     - The CSR representation is *derived* and does not change the conceptual meaning
       of fusion pairs.
     """
+
     def __init__(
             self,
-            fusion_pairs: npt.ArrayLike,
-            weights: npt.ArrayLike,
+            fusion_pairs: EdgeArrayLike,
+            weights: FloatArrayLike,
             *,
             n_params: Optional[int] = None,
             check_input: bool = True,
@@ -74,9 +77,9 @@ class GFLStructure:
     ):
         if check_input:
             fusion_pairs_arr, weights_arr, inferred_n_params = check_fusion_pairs(
-                fusion_pairs, 
-                weights, 
-                n_params=n_params, 
+                fusion_pairs,
+                weights,
+                n_params=n_params,
                 duplicate_strategy=duplicate_strategy
             )
             if n_params is None:
@@ -87,13 +90,12 @@ class GFLStructure:
         else:
             fusion_pairs_arr = np.asarray(fusion_pairs, dtype=np.int64)
             weights_arr = np.asarray(weights, dtype=np.float64)
-            if (fusion_pairs_arr.ndim == 2 and 
-                fusion_pairs_arr.shape[0] == 2 and 
-                fusion_pairs_arr.shape[1] != 2):
+            if (fusion_pairs_arr.ndim == 2 and
+                    fusion_pairs_arr.shape[0] == 2 and
+                    fusion_pairs_arr.shape[1] != 2):
                 fusion_pairs_arr = fusion_pairs_arr.T
             if n_params is None:
                 n_params = int(fusion_pairs_arr.max() + 1) if fusion_pairs_arr.size else 0
-        
 
         self.fusion_pairs = fusion_pairs_arr
         self.weights = weights_arr
@@ -115,7 +117,7 @@ class GFLStructure:
             arr = csr_array((n, n), dtype=np.float64)
             self._csr_arr = arr
             return
-        
+
         u = self.fusion_pairs[:, 0]
         v = self.fusion_pairs[:, 1]
         w = self.weights
@@ -128,8 +130,8 @@ class GFLStructure:
         arr = coo_array((data, (rows, cols)), shape=(n, n), dtype=np.float64).tocsr()
 
         self._csr_arr = arr
-    
-    def get_neighbors(self, i: int) -> npt.NDArray[np.int64]:
+
+    def get_neighbors(self, i: int) -> IntArray:
         """
         Return neighbors of parameter i.
         
@@ -147,7 +149,7 @@ class GFLStructure:
         start, end = self._csr_arr.indptr[i], self._csr_arr.indptr[i + 1]
         return self._csr_arr.indices[start:end]
 
-    def get_neighbor_weights(self, i: int) -> npt.NDArray[np.float64]:
+    def get_neighbor_weights(self, i: int) -> FloatArray:
         """
         Return the weights aligned with `get_neighbors(i)`
         
@@ -165,7 +167,7 @@ class GFLStructure:
         start, end = self._csr_arr.indptr[i], self._csr_arr.indptr[i + 1]
         return self._csr_arr.data[start:end]
 
-    def get_neighbor_data(self, i: int) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64]]:
+    def get_neighbor_data(self, i: int) -> Tuple[IntArray, FloatArray]:
         """
         Return (neighbors, weights) for parameter i.
 
@@ -195,14 +197,14 @@ class GFLStructure:
         self._validate_index(i)
         return self._csr_arr.indptr[i + 1] - self._csr_arr.indptr[i]
 
-    def degrees(self) -> npt.NDArray[np.int64]:
+    def degrees(self) -> IntArray:
         """
         Degree of every parameter.
 
         Returns
         -------
         degrees : ndarray of shape (n_params,)
-            Number of neigbors for each parameter.
+            Number of neighbors for each parameter.
         """
         return np.diff(self._csr_arr.indptr)
 
@@ -235,27 +237,27 @@ class GFLStructure:
         n = self.n_params
         if m == 0:
             return csr_array((n, m), dtype=np.float64)
-        
+
         i, j = self.fusion_pairs[:, 0], self.fusion_pairs[:, 1]
-        
+
         # Build properly interleaved COO data
         # For each pair k: (i[k], k) gets +w[k], (j[k], k) gets -w[k]
         rows = np.empty(2 * m, dtype=np.int64)
         rows[0::2] = i  # Even positions: first index
         rows[1::2] = j  # Odd positions: second index
-        
+
         cols = np.repeat(np.arange(m, dtype=np.int64), 2)
-        
+
         if weighted:
             data = np.empty(2 * m, dtype=np.float64)
-            data[0::2] = self.weights   # Even positions: +w
+            data[0::2] = self.weights  # Even positions: +w
             data[1::2] = -self.weights  # Odd positions: -w
         else:
             data = np.tile([1.0, -1.0], m)
-        
+
         return coo_array((data, (rows, cols)), shape=(n, m), dtype=np.float64).tocsr()
 
-    def to_adjacency_list(self) -> List[Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64]]]:
+    def to_adjacency_list(self) -> List[Tuple[IntArray, FloatArray]]:
         """
         Convert to an adjacency-list representation.
 
@@ -282,16 +284,16 @@ class GFLStructure:
             for j, w in zip(nbrs, ws):
                 adj_dict[i][int(j)] = float(w)
         return adj_dict
-    
+
     def _validate_index(self, i: int) -> None:
         """Validate the parameter index"""
         if not 0 <= i < self.n_params:
             raise IndexError(f"Parameter index {i} out of range [0, {self.n_params})")
-        
+
     def __len__(self) -> int:
         """Return the number of parameters."""
         return self.n_params
-    
+
     def __repr__(self):
         mean_deg = self.degrees().mean() if self.n_params > 0 else 0.0
         return (

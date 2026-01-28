@@ -1,8 +1,8 @@
 """Group operation utilities."""
 
 import numpy as np
-import numpy.typing as npt
 from typing import Optional, NamedTuple
+from gfl.typing import IntArray, FloatArray
 
 
 class GroupData(NamedTuple):
@@ -21,15 +21,15 @@ class GroupData(NamedTuple):
         Whether the input corresponds to true grouping
         (False if each observation is its own group).
     """
-    sizes: npt.NDArray[np.int64]
-    sums: npt.NDArray[np.float64]
-    means: npt.NDArray[np.float64]
+    sizes: IntArray
+    sums: FloatArray
+    means: FloatArray
     is_grouped_data: bool
 
 
 def compute_group_data(
-    data: npt.NDArray[np.float64],
-    groups: npt.NDArray[np.int64],
+    data: FloatArray,
+    groups: IntArray,
     n_groups: Optional[int] = None
 ) -> GroupData:
     """

@@ -3,13 +3,13 @@ Label encoding utilities for group-structured data.
 """
 
 import numpy as np
-import numpy.typing as npt
-from typing import Dict, Optional
+from typing import Dict, Optional, Union
 
 from .validation import _check_fitted, _ensure_pairs_format, _check_ndim
+from gfl.typing import IntArray, EdgeArrayLike, ArrayLike
 
 
-def _check_no_nan(groups: npt.NDArray, name: str = "groups") -> None:
+def _check_no_nan(groups: np.ndarray, name: str = "groups") -> None:
     """
     Check that array contains no NaN or None values.
     """
@@ -79,12 +79,12 @@ class GroupEncoder:
     
     def __init__(self, sort: bool = True):
         self.sort = sort
-        self.classes_: Optional[npt.NDArray] = None
+        self.classes_: Optional[np.ndarray] = None
         self.n_groups_: Optional[int] = None
         self.encoding_: Optional[Dict] = None
         self.decoding_: Optional[Dict] = None
     
-    def fit(self, groups: npt.ArrayLike) -> "GroupEncoder":
+    def fit(self, groups: ArrayLike) -> "GroupEncoder":
         """
         Learn the encoding from group labels.
         
@@ -121,7 +121,7 @@ class GroupEncoder:
         
         return self
     
-    def transform(self, groups: npt.ArrayLike) -> npt.NDArray[np.int_]:
+    def transform(self, groups: Union[np.ndarray, list]) -> IntArray:
         """
         Transform group labels to contiguous encoding.
         
@@ -163,7 +163,7 @@ class GroupEncoder:
         
         return groups_encoded
     
-    def fit_transform(self, groups: npt.ArrayLike) -> npt.NDArray[np.int_]:
+    def fit_transform(self, groups: Union[np.ndarray, list]) -> IntArray:
         """
         Fit encoder and transform in one step.
         
@@ -181,8 +181,8 @@ class GroupEncoder:
     
     def inverse_transform(
         self, 
-        groups_encoded: npt.ArrayLike
-    ) -> npt.NDArray:
+        groups_encoded: Union[np.ndarray, list]
+    ) -> np.ndarray:
         """
         Transform encoded labels back to original labels.
         
@@ -203,7 +203,7 @@ class GroupEncoder:
         """
         _check_fitted(self, ['decoding_'], 'encoder')
         
-        groups_encoded = np.asarray(groups_encoded, dtype=np.int_)
+        groups_encoded = np.asarray(groups_encoded, dtype=np.int64)
         
         _check_ndim(groups_encoded, expected_dim=1, name="groups_encoded")
         
@@ -223,8 +223,8 @@ class GroupEncoder:
     
     def transform_pairs(
         self, 
-        fusion_pairs: npt.ArrayLike
-    ) -> npt.NDArray[np.int64]:
+        fusion_pairs: ArrayLike
+    ) -> IntArray:
         """
         Transform fusion pairs using the same encoding.
         
@@ -277,8 +277,8 @@ class GroupEncoder:
     
     def inverse_transform_pairs(
         self, 
-        pairs_encoded: npt.ArrayLike
-    ) -> npt.NDArray:
+        pairs_encoded: EdgeArrayLike
+    ) -> np.ndarray:
         """
         Transform encoded fusion pairs back to original labels.
         

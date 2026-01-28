@@ -1,19 +1,18 @@
 """Adaptive weights and other weights for GFL"""
 import numpy as np
-import numpy.typing as npt
 from typing import Optional
-
 from gfl.utils.validation import check_array, _ensure_pairs_format
+from gfl.typing import EdgeArrayLike, FloatArrayLike, FloatArray
 
 
 def compute_adaptive_weights(
-        fusion_pairs: npt.ArrayLike,
-        theta_init: npt.ArrayLike,
+        fusion_pairs: EdgeArrayLike,
+        theta_init: FloatArrayLike,
         *,
         gamma: float = 1.0,
         w_max: Optional[float] = None,
         check_inputs: bool = True
-) -> npt.NDArray[np.float64]:
+) -> FloatArray:
     """
     Compute adaptive fusion weights using a Zou-Hastie style scheme.
 
@@ -137,11 +136,11 @@ def compute_adaptive_weights(
 
 
 def compute_uniform_weights(
-        fusion_pairs: npt.ArrayLike,
+        fusion_pairs: EdgeArrayLike,
         *,
         value: float = 1.0,
         check_inputs: bool = True
-) -> npt.NDArray[np.float64]:
+) -> FloatArray:
     """
     Compute uniform weights for all fusion pairs.
 
@@ -192,11 +191,11 @@ def compute_uniform_weights(
 
 
 def compute_distance_weights(
-        fusion_pairs: npt.ArrayLike,
-        theta_init: npt.ArrayLike,
+        fusion_pairs: EdgeArrayLike,
+        theta_init: FloatArrayLike,
         *,
         check_inputs: bool = True
-) -> npt.NDArray[np.float64]:
+) -> FloatArray:
     """
     Compute L2-based distance weights measuring dissimilarity between groups.
 

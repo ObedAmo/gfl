@@ -40,9 +40,9 @@ def test_accepts_tuples():
 def test_accepts_numpy_arrays():
     """Test that function accepts numpy arrays."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        np.array([3.0, 7.0]), 
-        np.array([1.0, 1.0]), 
+        10.0, 50.0,
+        np.array([3.0, 7.0]),
+        np.array([1.0, 1.0]),
         1.0
     )
     assert isinstance(result, float)
@@ -121,9 +121,9 @@ def test_two_neighbors_boundary_fusion():
 def test_three_neighbors_symmetric():
     """Test with three symmetric neighbors."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        [3.0, 5.0, 7.0], 
-        [1.0, 1.0, 1.0], 
+        10.0, 50.0,
+        [3.0, 5.0, 7.0],
+        [1.0, 1.0, 1.0],
         1.0
     )
     # Should be close to median neighbor
@@ -142,9 +142,9 @@ def test_many_neighbors_equal_weights():
 def test_general_case_weighted():
     """Test general case with non-uniform weights."""
     result = solve_scalar_fused_lasso(
-        20.0, 100.0, 
-        [1.0, 5.0, 9.0], 
-        [2.0, 1.0, 1.0], 
+        20.0, 100.0,
+        [1.0, 5.0, 9.0],
+        [2.0, 1.0, 1.0],
         1.5
     )
     # With these parameters, optimal is at the middle value
@@ -162,10 +162,10 @@ def test_objective_at_solution():
     adj_vals = np.array([3.0, 7.0])
     weights = np.array([1.0, 1.0])
     reg_lambda = 1.0
-    
+
     x_opt = solve_scalar_fused_lasso(group_size, group_sum, adj_vals, weights, reg_lambda)
     obj_opt = scalar_fused_lasso_objective(x_opt, group_size, group_sum, adj_vals, weights, reg_lambda)
-    
+
     # Check that nearby points have higher objective
     for dx in [-0.1, 0.1]:
         obj_nearby = scalar_fused_lasso_objective(
@@ -182,13 +182,13 @@ def test_objective_components():
     adj_vals = np.array([3.0, 7.0])
     weights = np.array([1.0, 1.0])
     reg_lambda = 1.0
-    
+
     # Compute manually
-    quad_term = 0.5 * group_size * x**2 - group_sum * x
-    fusion_term = reg_lambda * (weights[0] * abs(x - adj_vals[0]) + 
-                                 weights[1] * abs(x - adj_vals[1]))
+    quad_term = 0.5 * group_size * x ** 2 - group_sum * x
+    fusion_term = reg_lambda * (weights[0] * abs(x - adj_vals[0]) +
+                                weights[1] * abs(x - adj_vals[1]))
     expected = quad_term + fusion_term
-    
+
     result = scalar_fused_lasso_objective(x, group_size, group_sum, adj_vals, weights, reg_lambda)
     assert_allclose(result, expected, rtol=1e-10)
 
@@ -200,9 +200,9 @@ def test_objective_components():
 def test_all_neighbors_equal():
     """When all neighbors have same value."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        [5.0, 5.0, 5.0], 
-        [1.0, 1.0, 1.0], 
+        10.0, 50.0,
+        [5.0, 5.0, 5.0],
+        [1.0, 1.0, 1.0],
         1.0
     )
     # Should be exactly the neighbor value
@@ -212,9 +212,9 @@ def test_all_neighbors_equal():
 def test_very_large_lambda():
     """Very large regularization should force fusion."""
     result = solve_scalar_fused_lasso(
-        10.0, 100.0, 
-        [3.0], 
-        [1.0], 
+        10.0, 100.0,
+        [3.0],
+        [1.0],
         1000.0
     )
     # Should fuse to neighbor despite mean being 10.0
@@ -224,9 +224,9 @@ def test_very_large_lambda():
 def test_very_small_lambda():
     """Very small regularization should approach group mean."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        [3.0, 7.0], 
-        [1.0, 1.0], 
+        10.0, 50.0,
+        [3.0, 7.0],
+        [1.0, 1.0],
         1e-6
     )
     # Should be very close to group mean
@@ -236,9 +236,9 @@ def test_very_small_lambda():
 def test_zero_weights():
     """Test behavior with zero weights (effectively no neighbors)."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        [3.0, 7.0], 
-        [0.0, 0.0], 
+        10.0, 50.0,
+        [3.0, 7.0],
+        [0.0, 0.0],
         1.0
     )
     # Zero weights means no fusion penalty
@@ -252,9 +252,9 @@ def test_zero_weights():
 def test_large_values():
     """Test with large values."""
     result = solve_scalar_fused_lasso(
-        1000.0, 5000.0, 
-        [3.0, 7.0], 
-        [1.0, 1.0], 
+        1000.0, 5000.0,
+        [3.0, 7.0],
+        [1.0, 1.0],
         1.0
     )
     assert np.isfinite(result)
@@ -263,9 +263,9 @@ def test_large_values():
 def test_small_values():
     """Test with very small values."""
     result = solve_scalar_fused_lasso(
-        1e-3, 5e-3, 
-        [3e-3, 7e-3], 
-        [1e-3, 1e-3], 
+        1e-3, 5e-3,
+        [3e-3, 7e-3],
+        [1e-3, 1e-3],
         1e-3
     )
     assert np.isfinite(result)
@@ -274,9 +274,9 @@ def test_small_values():
 def test_mixed_scale_neighbors():
     """Test with neighbors at very different scales."""
     result = solve_scalar_fused_lasso(
-        10.0, 50.0, 
-        [1e-6, 1e6], 
-        [1.0, 1.0], 
+        10.0, 50.0,
+        [1e-6, 1e6],
+        [1.0, 1.0],
         1.0
     )
     assert np.isfinite(result)
@@ -322,17 +322,16 @@ def test_increasing_lambda_increases_fusion():
     group_sum = 50.0
     adj_vals = [3.0]
     weights = [1.0]
-    
+
     results = []
     for lam in [0.1, 1.0, 10.0]:
         result = solve_scalar_fused_lasso(group_size, group_sum, adj_vals, weights, lam)
         results.append(result)
-    
+
     # Should move monotonically toward neighbor (3.0) as lambda increases
     diffs = [abs(r - 3.0) for r in results]
-    assert all(diffs[i] >= diffs[i+1] for i in range(len(diffs)-1))
+    assert all(diffs[i] >= diffs[i + 1] for i in range(len(diffs) - 1))
 
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
-    

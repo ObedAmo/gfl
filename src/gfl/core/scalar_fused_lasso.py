@@ -4,7 +4,7 @@ This module provides an efficient solver for the scalar subproblem that
 arises in coordinate descent algorithms for generalized fused lasso regression.
 """
 import numpy as np
-import numpy.typing as npt
+from gfl.typing import FloatArray, FloatArrayLike
 
 __all__ = ['solve_scalar_fused_lasso', 'scalar_fused_lasso_objective']
 
@@ -14,8 +14,8 @@ EPS = 1e-8
 def solve_scalar_fused_lasso(
         group_size: float,
         group_sum: float,
-        adj_values: npt.ArrayLike,
-        weights: npt.ArrayLike,
+        adj_values: FloatArrayLike,
+        weights: FloatArrayLike,
         reg_lambda: float
 ) -> float:
     """
@@ -24,8 +24,7 @@ def solve_scalar_fused_lasso(
     This function solves the optimization problem that arises in coordinate
     descent algorithms for generalized fused lasso regression:
 
-    .. math::
-        \\min_x \\frac{1}{2} n_s x^2 - s x + \\lambda \\sum_{i}^{r} w_i |x - z_i|
+        min_x (1/2) n_s x^2 - s x + λ sum_{i}^{r} w_i |x - z_i|
 
     where n_s is the group size, s is the group sum, z_i are neighbor values,
     and w_i are edge weights.
@@ -146,8 +145,8 @@ def scalar_fused_lasso_objective(
         x: float,
         group_size: float,
         group_sum: float,
-        adj_values: npt.ArrayLike,
-        weights: npt.ArrayLike,
+        adj_values: FloatArrayLike,
+        weights: FloatArrayLike,
         reg_lambda: float
 ) -> float:
     """
@@ -203,8 +202,8 @@ def _solve_single_neighbor(
 def _solve_two_neighbors(
         group_size: float,
         group_sum: float,
-        adj_values: npt.NDArray[np.float64],
-        weights: npt.NDArray[np.float64],
+        adj_values: FloatArray,
+        weights: FloatArray,
         lam: float
 ) -> float:
     """Solve for two neighbors case (closed-form three-region solution)."""
@@ -244,8 +243,8 @@ def _solve_two_neighbors(
 def _solve_general_case(
         group_size: float,
         group_sum: float,
-        adj_vals: npt.NDArray[np.float64],
-        weights: npt.NDArray[np.float64],
+        adj_vals: FloatArray,
+        weights: FloatArray,
         reg_lambda: float
 ) -> float:
     """Solve for three or more neighbors (general algorithm)."""
@@ -292,11 +291,12 @@ def _solve_general_case(
         reg_lambda
     )
 
+
 def _fallback_boundary_search(
         group_size: float,
         group_sum: float,
-        z_sorted: npt.NDArray[np.float64],
-        ws_sorted: npt.NDArray[np.float64],
+        z_sorted: FloatArray,
+        ws_sorted: FloatArray,
         lam: float,
 ) -> float:
     """
@@ -319,8 +319,8 @@ def _fallback_boundary_search(
 
 
 def _weighted_median(
-        values: npt.NDArray[np.float64],
-        weights: npt.NDArray[np.float64]
+        values: FloatArray,
+        weights: FloatArray
 ) -> float:
     """
     Compute the weighted median of values with given non-negative weights.
@@ -360,6 +360,6 @@ def _weighted_median(
 
     # First index where cumulative weight exceeds half
     median_idx = np.searchsorted(wc, 0.5 * w_total)
-    median_idx = min(median_idx, len(v_sorted) - 1)
+    median_idx = min(int(median_idx), len(v_sorted) - 1)
 
     return float(v_sorted[median_idx])

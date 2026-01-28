@@ -1,15 +1,19 @@
 import numpy as np
-import numpy.typing as npt
-from typing import Tuple, Optional, Literal, Any
+from typing import Tuple, Optional, Any
 
-from gfl._types import DuplicateStrategy
+from gfl.typing import (
+    DuplicateStrategy,
+    IntArray, FloatArray,
+    FloatArrayLike, IntArrayLike,
+    EdgeArrayLike
+)
 
 
 def _ensure_array(
-    arr: Any, 
-    dtype: type, 
-    name: str = "array"
-) -> npt.NDArray:
+        arr: Any,
+        dtype: type,
+        name: str = "array"
+) -> np.ndarray:
     """Convert input to numpy array with specified dtype."""
     try:
         return np.asarray(arr, dtype=dtype)
@@ -18,9 +22,9 @@ def _ensure_array(
 
 
 def _check_ndim(
-    arr: npt.NDArray, 
-    expected_dim: int, 
-    name: str = "array"
+        arr: np.ndarray,
+        expected_dim: int,
+        name: str = "array"
 ) -> None:
     """Validate array dimensionality."""
     if arr.ndim != expected_dim:
@@ -28,11 +32,12 @@ def _check_ndim(
             f"{name} must be {expected_dim}D, "
             f"got {arr.ndim}D array"
         )
-    
+
+
 def _check_length(
-    arr: npt.NDArray,
-    expected_length: int,
-    name: str = "array"
+        arr: np.ndarray,
+        expected_length: int,
+        name: str = "array"
 ) -> None:
     """Check array length matches expected value."""
     if len(arr) != expected_length:
@@ -40,10 +45,10 @@ def _check_length(
             f"{name} has length {len(arr)}, expected {expected_length}"
         )
 
- 
+
 def _check_finite(
-    arr: npt.NDArray, 
-    name: str = "array"
+        arr: np.ndarray,
+        name: str = "array"
 ) -> None:
     """Check array contains only finite values."""
     if np.any(~np.isfinite(arr)):
@@ -51,15 +56,19 @@ def _check_finite(
 
 
 def _check_non_negative(
-    arr: npt.NDArray, 
-    name: str = "array"
+        arr: np.ndarray,
+        name: str = "array"
 ) -> None:
     """Check array contains only non-negative values."""
     if np.any(arr < 0):
         raise ValueError(f"{name} must contain only non-negative values")
-    
 
-def _check_fitted(obj: Any, attributes: list, name: str = "estimator") -> None:
+
+def _check_fitted(
+        obj: Any,
+        attributes: list,
+        name: str = "estimator"
+) -> None:
     """
     Check if object has been fitted by verifying attributes exist.
     
@@ -95,21 +104,21 @@ def _check_fitted(obj: Any, attributes: list, name: str = "estimator") -> None:
 
 
 def _check_positive(
-    arr: npt.NDArray, 
-    name: str = "array"
+        arr: np.ndarray,
+        name: str = "array"
 ) -> None:
     """Check array contains only positive values."""
     if np.any(arr <= 0):
         raise ValueError(f"{name} must contain only positive values")
-    
+
 
 def _check_bounds(
-    arr: npt.NDArray,
-    *,
-    lower: Optional[float] = None,
-    upper: Optional[float] = None,
-    name: str = "array",
-    inclusive: bool = True
+        arr: np.ndarray,
+        *,
+        lower: Optional[float] = None,
+        upper: Optional[float] = None,
+        name: str = "array",
+        inclusive: bool = True
 ) -> None:
     """Check array values within bounds."""
     if lower is not None:
@@ -117,7 +126,7 @@ def _check_bounds(
             raise ValueError(f"{name} must be >= {lower}")
         elif not inclusive and np.any(arr <= lower):
             raise ValueError(f"{name} must be > {lower}")
-        
+
     if upper is not None:
         if inclusive and np.any(arr > upper):
             raise ValueError(f"{name} must be <= {upper}")
@@ -126,15 +135,15 @@ def _check_bounds(
 
 
 def check_array(
-    arr: Any,
-    name: str,
-    dtype: type,
-    ndim: int = 1,
-    *,
-    allow_nan: bool = False,
-    check_non_negative: bool = False,
-    check_positive: bool = False
-) -> npt.NDArray:
+        arr: Any,
+        name: str,
+        dtype: type,
+        ndim: int = 1,
+        *,
+        allow_nan: bool = False,
+        check_non_negative: bool = False,
+        check_positive: bool = False
+) -> np.ndarray:
     """
     Validate and convert to array with checks.
     
@@ -176,14 +185,14 @@ def check_array(
 
 
 def check_1d_array(
-    arr: Any,
-    name: str,
-    dtype: type,
-    *,
-    allow_nan: bool = False,
-    check_non_negative: bool = False,
-    check_positive: bool = False
-) -> npt.NDArray:
+        arr: Any,
+        name: str,
+        dtype: type,
+        *,
+        allow_nan: bool = False,
+        check_non_negative: bool = False,
+        check_positive: bool = False
+) -> np.ndarray:
     """
     Validate and convert to 1D array with checks.
     """
@@ -196,10 +205,10 @@ def check_1d_array(
 
 
 def check_groups(
-    groups: npt.ArrayLike,
-    n_samples: int,
-    n_groups: Optional[int] = None
-) -> Tuple[npt.NDArray[np.int64], int]:
+        groups: IntArrayLike,
+        n_samples: int,
+        n_groups: Optional[int] = None
+) -> Tuple[IntArray, int]:
     """
     Validate group assignments are in contiguous format [0, n_groups-1].
 
@@ -239,9 +248,9 @@ def check_groups(
     (array([0, 2, 4]), 5)
     """
     groups = check_1d_array(
-        groups, 
+        groups,
         name="groups",
-        dtype=np.int64, 
+        dtype=np.int64,
         check_non_negative=True
     )
 
@@ -250,7 +259,7 @@ def check_groups(
     if len(groups) == 0:
         n_groups = n_groups if n_groups is not None else 0
         return groups, n_groups
-    
+
     unique_groups = np.unique(groups)
     n_unique = len(unique_groups)
     min_group = unique_groups[0]
@@ -262,7 +271,7 @@ def check_groups(
         # Check that groups are exactly [0, 1, ..., n_unique-1]
         if min_group != 0 or max_group != n_groups - 1:
             raise ValueError(
-                f"groups must be in contiguous format [0, ..., {n_groups-1}]. "
+                f"groups must be in contiguous format [0, ..., {n_groups - 1}]. "
                 f"Found groups in range [{min_group}, {max_group}]. "
                 "Please relabel your groups to start from 0 with no gaps in observed values. "
                 "Consider using GroupEncoder: from gfl.utils import GroupEncoder"
@@ -273,34 +282,34 @@ def check_groups(
             raise ValueError(
                 f"n_groups must be a positive integer, got {n_groups}"
             )
-        
+
         if n_unique > n_groups:
             raise ValueError(
                 f"groups contains {n_unique} unique values, "
                 f"but n_groups={n_groups}. Cannot have more unique groups than n_groups."
             )
-        
+
         # Check that all groups are in valid range [0, n_groups-1]
         if max_group >= n_groups:
             raise ValueError(
                 f"groups contains values >= n_groups. "
                 f"Max group ID is {max_group}, but n_groups={n_groups}. "
-                f"All group IDs must be in [0, {n_groups-1}]."
+                f"All group IDs must be in [0, {n_groups - 1}]."
             )
-        
+
         if min_group != 0:
             raise ValueError(
                 f"groups must start from 0. Found minimum group ID = {min_group}. "
-                f"Please relabel your groups to [0, ..., {n_groups-1}]."
+                f"Please relabel your groups to [0, ..., {n_groups - 1}]."
             )
-    
+
     return groups, n_groups
 
 
 def _ensure_pairs_format(
-    pairs: npt.NDArray,
-    name: str = "pairs"
-) -> Tuple[npt.NDArray, int]:
+        pairs: np.ndarray,
+        name: str = "pairs"
+) -> Tuple[np.ndarray, int]:
     """
     Ensure pairs array is in (n_pairs, 2) format.
     
@@ -322,7 +331,7 @@ def _ensure_pairs_format(
     """
     if pairs.ndim != 2:
         raise ValueError(f"{name} must be 2D array, got {pairs.ndim}D")
-    
+
     if pairs.shape[1] == 2:
         # Already in (n_pairs, 2) format
         return pairs, pairs.shape[0]
@@ -337,9 +346,9 @@ def _ensure_pairs_format(
 
 
 def _canonicalize_pairs(
-    fusion_pairs: npt.NDArray[np.int64],
-    weights: npt.NDArray[np.float64]
-) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64]]:
+        fusion_pairs: IntArray,
+        weights: FloatArray
+) -> Tuple[IntArray, FloatArray]:
     """
     Remove self-loops and enforce undirected ordering (i < j).
     """
@@ -350,7 +359,7 @@ def _canonicalize_pairs(
 
     if fusion_pairs.size == 0:
         return fusion_pairs.reshape(0, 2), weights[:0]
-    
+
     # Enforce i < j
     i, j = fusion_pairs[:, 0], fusion_pairs[:, 1]
     u = np.minimum(i, j)
@@ -361,62 +370,62 @@ def _canonicalize_pairs(
 
 
 def _sort_pairs(
-    fusion_pairs: npt.NDArray[np.int64],
-    weights: npt.NDArray[np.float64],
-) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64]]:
+        fusion_pairs: IntArray,
+        weights: FloatArray,
+) -> Tuple[IntArray, FloatArray]:
     """Lexicographically sort fusion pairs."""
     order = np.lexsort((fusion_pairs[:, 1], fusion_pairs[:, 0]))
     return fusion_pairs[order], weights[order]
 
 
-def _has_duplicates(fusion_pairs: npt.NDArray[np.int64]):
+def _has_duplicates(fusion_pairs: IntArray) -> bool:
     """Check if sorted fusion pairs contains duplicates."""
     if fusion_pairs.shape[0] <= 1:
         return False
-    
+
     return np.any((fusion_pairs[1:] == fusion_pairs[:-1]).all(axis=1))
 
 
 def _aggregate_weights(
-        weights: npt.NDArray[np.float64],
-        group_id: npt.NDArray[np.intp],
+        weights: FloatArray,
+        group_id: IntArray,
         strategy: str
-) -> npt.NDArray[np.float64]:
+) -> FloatArray:
     """Aggregate duplicate weights according to strategy."""
     n_groups = group_id.max() + 1
-    
+
     if strategy == "first":
         idx = np.searchsorted(group_id, np.arange(n_groups))
         return weights[idx]
-    
+
     if strategy == "sum":
-        return np.bincount(group_id, weights=weights, minlength=n_groups)
-    
+        return np.bincount(group_id, weights=weights, minlength=n_groups).astype(np.float64)
+
     if strategy == "mean":
         sums = np.bincount(group_id, weights=weights, minlength=n_groups)
         counts = np.bincount(group_id, minlength=n_groups)
         return sums / counts
-    
+
     if strategy == "max":
         out = np.full(n_groups, -np.inf)
         np.maximum.at(out, group_id, weights)
         return out
-    
+
     if strategy == "min":
         out = np.full(n_groups, np.inf)
         np.minimum.at(out, group_id, weights)
         return out
-    
+
     raise RuntimeError("Unhandled duplicate aggregation strategy")
 
 
 def check_fusion_pairs(
-        fusion_pairs: npt.ArrayLike,
-        weights: npt.ArrayLike,
+        fusion_pairs: EdgeArrayLike,
+        weights: FloatArray,
         *,
         n_params: Optional[int] = None,
-        duplicate_strategy: DuplicateStrategy= 'first'
-) -> Tuple[npt.NDArray[np.int64], npt.NDArray[np.float64], int]:
+        duplicate_strategy: DuplicateStrategy = 'first'
+) -> Tuple[IntArray, FloatArray, int]:
     """
     Validate and canonicalize fusion pairs and weights.
 
@@ -428,7 +437,7 @@ def check_fusion_pairs(
         Positive fusion weights.
     n_params : int, optional
         Total number of parameters. If None, inferred as max(fusion_pairs) + 1
-    uplicate_strategy : {'first','sum','mean','max','min'}, default='first'
+    duplicate_strategy : {'first','sum','mean','max','min'}, default='first'
         Strategy used to resolve duplicate fusion pairs:
         - 'first': Keep weight from first occurrence
         - 'sum': Sum weights of duplicates
@@ -466,19 +475,19 @@ def check_fusion_pairs(
     """
     # Validate fusion_pairs
     fusion_pairs = check_array(
-        fusion_pairs, name="fusion_pairs", 
+        fusion_pairs, name="fusion_pairs",
         dtype=np.int64,
         ndim=2,
         check_non_negative=True
     )
-    
+
     # Ensure correct format and get n_pairs
     fusion_pairs, n_pairs = _ensure_pairs_format(fusion_pairs, "fusion_pairs")
 
     # validate weights
     weights = check_1d_array(
-        weights, 
-        name="weights", 
+        weights,
+        name="weights",
         dtype=np.float64,
         allow_nan=False,
         check_positive=True
@@ -491,7 +500,7 @@ def check_fusion_pairs(
     if n_params is not None:
         if not isinstance(n_params, (int, np.integer)) or n_params <= 0:
             raise ValueError(f"n_params must be a positive integer, got {n_params}")
-        
+
         _check_bounds(fusion_pairs, upper=n_params - 1, name="fusion_pairs")
 
     # Canonicalized
@@ -500,13 +509,13 @@ def check_fusion_pairs(
     if fusion_pairs.size == 0:
         inferred_n_params = 0 if n_params is None else n_params
         return fusion_pairs, weights, inferred_n_params
-    
+
     fusion_pairs, weights = _sort_pairs(fusion_pairs, weights)
 
     # Deduplicate if needed
     if _has_duplicates(fusion_pairs):
         view = np.ascontiguousarray(fusion_pairs).view(
-        np.dtype((np.void, fusion_pairs.dtype.itemsize * 2))
+            np.dtype((np.void, fusion_pairs.dtype.itemsize * 2))
         )
         _, unique_idx, group_id = np.unique(view, return_index=True, return_inverse=True)
         group_id = group_id.ravel()
@@ -521,13 +530,13 @@ def check_fusion_pairs(
 
 
 def check_groups_and_pairs(
-    groups: npt.ArrayLike,
-    n_samples: int,
-    fusion_pairs: npt.ArrayLike,
-    weights: npt.ArrayLike,
-    n_groups: Optional[int] = None,
-    duplicate_strategy: DuplicateStrategy = 'first'
-) -> Tuple[npt.NDArray[np.int64], int, npt.NDArray[np.int64], npt.NDArray[np.float64]]:
+        groups: IntArrayLike,
+        n_samples: int,
+        fusion_pairs: EdgeArrayLike,
+        weights: FloatArrayLike,
+        n_groups: Optional[int] = None,
+        duplicate_strategy: DuplicateStrategy = 'first'
+) -> Tuple[IntArray, int, IntArray, FloatArray]:
     """
     Validate groups and fusion pairs together, ensuring consistency.
     
@@ -577,19 +586,19 @@ def check_groups_and_pairs(
     """
     # Validate groups first
     groups, n_groups = check_groups(groups, n_samples, n_groups)
-    
+
     # Validate fusion pairs with n_params = n_groups
     fusion_pairs, weights, n_params_inferred = check_fusion_pairs(
-        fusion_pairs, weights, 
+        fusion_pairs, weights,
         n_params=n_groups,
         duplicate_strategy=duplicate_strategy
     )
-    
+
     # Ensure consistency (should always pass if above validations passed)
     if n_params_inferred != n_groups:
         raise ValueError(
             f"Inconsistency detected: fusion_pairs infer n_params={n_params_inferred}, "
             f"but n_groups={n_groups}"
         )
-    
+
     return groups, n_groups, fusion_pairs, weights

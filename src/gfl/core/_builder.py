@@ -1,25 +1,28 @@
 """Builder utilities for GFL structures."""
 
 import numpy as np
-import numpy.typing as npt
-from typing import Optional, Literal
-
+from typing import Optional
 from gfl.core._structure import GFLStructure
 from gfl.core._ols import compute_groupwise_ols
 from gfl.core._weights import (
     compute_adaptive_weights,
     compute_uniform_weights
 )
-from gfl._types import OLSMethod
+from gfl.typing import (
+    OLSMethod,
+    FloatArrayLike,
+    IntArrayLike,
+    EdgeArrayLike
+)
 
 
 def build_gfl_structure(
-    y: npt.ArrayLike,
-    groups: npt.ArrayLike,
-    fusion_pairs: npt.ArrayLike,
+    y: FloatArrayLike,
+    groups: IntArrayLike,
+    fusion_pairs: EdgeArrayLike,
     *,
     n_groups: Optional[int] = None,
-    weights: Optional[npt.NDArray] = None,
+    weights: Optional[FloatArrayLike] = None,
     adaptive: bool = True,
     ols_method: OLSMethod = "mean",
     gamma: float = 1.0,

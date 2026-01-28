@@ -2,13 +2,49 @@
 Type aliases for the GFL package.
 """
 
-from typing import Literal
+from typing import Literal, TypeAlias, Sequence, Union, Any
+import numpy as np
+import numpy.typing as npt
 
 __all__ = [
+    "IntArray",
+    "FloatArray",
+    "IntArrayLike",
+    "FloatArrayLike",
+    "EdgeArrayLike",
+    "ArrayLike",
     "OLSMethod",
     "DuplicateStrategy",
     "SelectionCriterion",
-    
+    "SelectionRule",
+
+]
+
+
+IntArray: TypeAlias = npt.NDArray[np.int64]
+FloatArray: TypeAlias = npt.NDArray[np.float64]
+
+IntArrayLike: TypeAlias = Union[
+    IntArray,
+    Sequence[int],
+    Sequence[Sequence[int]]
+]
+
+FloatArrayLike: TypeAlias = Union[
+    FloatArray,
+    Sequence[float]
+]
+
+EdgeArrayLike: TypeAlias = Union[
+    IntArray,
+    Sequence[tuple[int, int]],
+    Sequence[list[int]]
+]
+
+ArrayLike = Union[
+    npt.NDArray[Any],
+    Sequence[Any],
+    Sequence[Sequence[Any]]
 ]
 
 # OLS estimation methods
@@ -63,3 +99,11 @@ Information criteria for model selection.
 - "ebic": Extended Bayesian Information Criterion
 """
 
+SelectionRule = Literal["min", "1se", "elbow"]
+"""
+Rules for selecting optimal lambda from information criterion curve.
+
+- "min": Global minimum
+- "1se": Sparsest model within threshold
+- "elbow": Elbow point detection
+"""
